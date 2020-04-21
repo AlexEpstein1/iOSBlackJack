@@ -64,7 +64,7 @@ class SinglePlayerScene: SKScene {
         dealerScore.fontColor = SKColor.white
         self.addChild(dealerScore)
         
-        background = SKSpriteNode(imageNamed: "menu_background")
+        background = SKSpriteNode(imageNamed: "game_background")
         background.zPosition = 1
         background.size = self.size
         background.position = CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.5)
@@ -103,6 +103,8 @@ class SinglePlayerScene: SKScene {
                 cards.append(c)
             }
         }
+        
+        cards.shuffle()
         self.addChild(cards[51].img)
         
         newHand()
@@ -145,7 +147,7 @@ class SinglePlayerScene: SKScene {
     
     func gameResult() {
         result.run(SKAction.fadeIn(withDuration: 0.5))
-        if player.handValue > 22 {
+        if player.handValue > 21 {
             result.text = "Player Busts"
             self.run(SKAction.wait(forDuration: 3.0)) {
                 self.cleanUp()
@@ -241,8 +243,6 @@ class SinglePlayerScene: SKScene {
     }
     
     private func newHand() {
-
-        cards.shuffle()
         
         // Add card images to scene
         for i in 0...3 {
