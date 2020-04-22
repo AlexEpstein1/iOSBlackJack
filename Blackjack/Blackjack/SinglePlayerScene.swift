@@ -155,18 +155,20 @@ class SinglePlayerScene: SKScene {
         }
         
         cards.shuffle()
-        /*cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+        /*
+        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.num == 10
         })!, 0)
         cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.ace
-        })!, 2)*/
-        /*cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+        })!, 2)
+        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.num == 10
         })!, 1)
         cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.ace
-        })!, 3)*/
+        })!, 3)
+ */
         self.addChild(cards[51].img)
         
         newHand()
@@ -287,8 +289,8 @@ class SinglePlayerScene: SKScene {
         updateBetLabels()
     }
     func draw() {
-        currBet = 0
         playerChips += currBet
+        currBet = 0
         updateBetLabels()
     }
     
