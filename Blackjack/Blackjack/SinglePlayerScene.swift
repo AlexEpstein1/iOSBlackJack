@@ -51,6 +51,7 @@ class SinglePlayerScene: SKScene {
         } else {
             playerChips = 500
         }
+        
          
         GameManager.first = true
         cardShoe = CGPoint(x: self.size.width * 0.8, y: self.size.height * 0.55)
@@ -155,8 +156,8 @@ class SinglePlayerScene: SKScene {
         }
         
         cards.shuffle()
-        /*
-        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+        
+        /*cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.num == 10
         })!, 0)
         cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
@@ -167,8 +168,8 @@ class SinglePlayerScene: SKScene {
         })!, 1)
         cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.ace
-        })!, 3)
- */
+        })!, 3)*/
+ 
         self.addChild(cards[51].img)
         
         newHand()
