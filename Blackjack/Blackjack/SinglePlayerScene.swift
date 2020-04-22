@@ -13,6 +13,7 @@ import SpriteKit
 
 
 class SinglePlayerScene: SKScene {
+    let defaultsKey = "defaultKey"
     var deck: Deck!
     var cards: [Card]! // The deck
     var cardShoe: CGPoint! // Location where cards are dealt from
@@ -27,12 +28,30 @@ class SinglePlayerScene: SKScene {
     var dealerScore: SKLabelNode! // Hand value labels for player
     var result: SKLabelNode! // Result of the round
     var backButton: SKLabelNode!
+    var chipsCountLabel: SKLabelNode! // Chips player posseses
+    var tableChipsCount: SKLabelNode! // Chips player has bet
+    var currBet = 0
+    var playerChips = 100 {
+        didSet {
+            UserDefaults.standard.set(playerChips, forKey: defaultsKey)
+        }
+    }
+    var canBet:Bool {
+        return gameState == 0
+    }
+    
     
     override func didMove(to view: SKView) {
         initializeGame()
     }
     
     private func initializeGame() {
+        if UserDefaults.standard.value(forKey: defaultsKey) != nil {
+            playerChips =  UserDefaults.standard.integer(forKey: defaultsKey)
+        } else {
+            playerChips = 500
+        }
+         
         GameManager.first = true
         cardShoe = CGPoint(x: self.size.width * 0.8, y: self.size.height * 0.55)
         player = Player(p: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.3))
@@ -41,6 +60,22 @@ class SinglePlayerScene: SKScene {
 //        playerScore = SKLabelNode()
 //        playerScore.fontSize = 30
 //        playerScore.position =
+        
+        chipsCountLabel = SKLabelNode(fontNamed: "ArialRoundedMTBold")
+        chipsCountLabel.zPosition = 2
+        chipsCountLabel.position = CGPoint(x: self.size.width * 0.85, y: self.size.height * 0.2)
+        chipsCountLabel.fontSize = 30
+        chipsCountLabel.text = "Chips: \(playerChips)"
+        chipsCountLabel.fontColor = SKColor.white
+        self.addChild(chipsCountLabel)
+        
+        tableChipsCount = SKLabelNode(fontNamed: "ArialRoundedMTBold")
+        tableChipsCount.zPosition = 2
+        tableChipsCount.position = CGPoint(x: self.size.width * 0.85, y: self.size.height * 0.4)
+        tableChipsCount.fontSize = 30
+        tableChipsCount.text = "Bet: 0"
+        tableChipsCount.fontColor = SKColor.white
+        self.addChild(tableChipsCount)
         
         result = SKLabelNode(fontNamed: "ArialRoundedMTBold")
         result.zPosition = 2
@@ -86,8 +121,8 @@ class SinglePlayerScene: SKScene {
         buttons = [SKSpriteNode]()
         buttons.append(SKSpriteNode(imageNamed: "hit"))
         buttons.append(SKSpriteNode(imageNamed: "stay"))
-        buttons.append(SKSpriteNode(imageNamed: "double"))
         buttons.append(SKSpriteNode(imageNamed: "BetFive"))
+        buttons.append(SKSpriteNode(imageNamed: "double"))
         
         let numButs = 3
         
@@ -125,8 +160,8 @@ class SinglePlayerScene: SKScene {
         })!, 0)
         cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.ace
-        })!, 2)
-        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+        })!, 2)*/
+        /*cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
             return card.num == 10
         })!, 1)
         cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
@@ -212,23 +247,54 @@ class SinglePlayerScene: SKScene {
         result.run(SKAction.fadeIn(withDuration: 1.5))
         if hasBlackjack(user: player) && !hasBlackjack(user: dealer) {
             result.text = "Blackjack!"
+            win(blackjack: true)
         } else if !hasBlackjack(user: player) && hasBlackjack(user: dealer) {
             result.text = "Dealer Blackjack!"
+            lose()
         } else if player.handValue > 21 {
             result.text = "You Lose!"
+            lose()
             self.run(SKAction.wait(forDuration: 3.0)) {
                 self.cleanUp()
             }
         } else if dealer.handValue > 21 {
+            win(blackjack: false)
             result.text = "You Win!"
         } else if dealer.handValue > player.handValue {
+            lose()
             result.text = "You Lose!"
         } else if dealer.handValue == player.handValue {
+            draw()
             result.text = "It's A Draw!"
         } else {
+            win(blackjack: false)
             result.text = "You Win!"
         }
 
+    }
+    
+    func win(blackjack:Bool) {
+        if blackjack {
+            playerChips += currBet/2
+        }
+        playerChips += currBet*2
+        currBet = 0
+        updateBetLabels()
+    }
+    
+    func lose() {
+        currBet = 0
+        updateBetLabels()
+    }
+    func draw() {
+        currBet = 0
+        playerChips += currBet
+        updateBetLabels()
+    }
+    
+    func updateBetLabels() {
+        chipsCountLabel.text = "Chips: \(playerChips)"
+        tableChipsCount.text = "Bet: \(currBet)"
     }
     
     func cleanUp() {
@@ -247,15 +313,8 @@ class SinglePlayerScene: SKScene {
             print("card index: " + String(self.cardIndex))
         }
     }
-    var done = false
     //  deals a card to the inputted position
     func dealCard(user: Player, flip: Bool) {
-        if !done {
-            done = true;
-            //cardIndex = 13
-        } else {
-            //cardIndex = 14
-        }
         user.addVal(c: cards[cardIndex], i: cardIndex)
         checkAces(user: user)
 
@@ -263,7 +322,7 @@ class SinglePlayerScene: SKScene {
 //        dealerScore.text = String(dealer.handValue)
         
         if !flip {
-            cards[cardIndex].img.run(SKAction.move(to: user.position, duration: 0.5))
+            cards[cardIndex].img.run(SKAction.move(to: user.position, duration: 0.8))
         }
         var c: Int
         c = cardIndex
@@ -296,6 +355,11 @@ class SinglePlayerScene: SKScene {
             let touchedNode = self.nodes(at: location)
             for node in touchedNode {
                 switch gameState {
+                case 0:
+                    if node.name == "2" {
+                        print("TEST")
+                        bet(5)
+                    }
                 case 1:
                     // Player's turn
                     if node.name == "0" {
@@ -314,8 +378,6 @@ class SinglePlayerScene: SKScene {
                     } else if node.name == "back" {
                         let newScene = GameScene(size: self.size)
                         self.scene?.view?.presentScene(newScene, transition: SKTransition.crossFade(withDuration: 1.0))
-                    } else if node.name == "2" {
-                        bet(5)
                     }
                 default: break
                 }
@@ -325,7 +387,11 @@ class SinglePlayerScene: SKScene {
     }
     
     func bet(_ bet:Int) {
-        
+        if canBet && playerChips >= bet {
+            playerChips -= bet
+            currBet += bet
+            updateBetLabels()
+        }
     }
     
     private func newHand() {
@@ -337,25 +403,25 @@ class SinglePlayerScene: SKScene {
         
         // Animations for dealing to player and dealer
         for i in 0...1 {
-            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i))) {
+            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i)*1.6)) {
                 self.dealCard(user: self.player, flip: false)
             }
-            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i) + 0.5)) {
+            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i)*1.6 + 0.8)) {
                 self.dealCard(user: self.dealer, flip: false)
             }
         }
-        cards[cardIndex].img.run(SKAction.wait(forDuration: 1.6)) {
+        cards[cardIndex].img.run(SKAction.wait(forDuration: 1.6*1.6)) {
             self.gameState=1
             self.adjustCards(user: self.player, factor: 0.2)
         }
-        cards[cardIndex].img.run(SKAction.wait(forDuration: 2.1)) {
+        cards[cardIndex].img.run(SKAction.wait(forDuration: 2.1*1.6)) {
             self.adjustCards(user: self.dealer, factor: 0.05)
         }
-        cards[0].img.run(SKAction.wait(forDuration: 1.9)) {
+        cards[0].img.run(SKAction.wait(forDuration: 1.9*1.6)) {
             self.flipCard(i: 0)
             self.flipCard(i: 2)
         }
-        cards[3].img.run(SKAction.wait(forDuration: 2.4)) {
+        cards[3].img.run(SKAction.wait(forDuration: 2.4*1.6)) {
             self.flipCard(i: 3)
             if self.hasBlackjack(user: self.player) {
                 self.gameResult()
@@ -365,7 +431,7 @@ class SinglePlayerScene: SKScene {
                 }
             }
         }
-        self.run(SKAction.wait(forDuration: 3.4)) {
+        self.run(SKAction.wait(forDuration: 3.4*1.6)) {
             if self.hasBlackjack(user: self.player) {
                 self.cleanUp()
             }
