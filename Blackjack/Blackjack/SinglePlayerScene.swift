@@ -31,6 +31,7 @@ class SinglePlayerScene: SKScene {
     var chipsCountLabel: SKLabelNode! // Chips player posseses
     var tableChipsCount: SKLabelNode! // Chips player has bet
     var currBet = 0
+    var dealButton: SKLabelNode!
     var playerChips = 100 {
         didSet {
             UserDefaults.standard.set(playerChips, forKey: defaultsKey)
@@ -84,6 +85,16 @@ class SinglePlayerScene: SKScene {
         result.text = ""
         result.fontColor = SKColor.white
         self.addChild(result)
+        
+        dealButton = SKLabelNode(fontNamed: "ArialRoundedMTBold")
+        dealButton.zPosition = 2
+        dealButton.position = CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.35)
+        dealButton.fontSize = 30
+        dealButton.text = "DEAL"
+        dealButton.name = "deal"
+        dealButton.fontColor = SKColor.white
+        self.addChild(dealButton)
+
         
 //        backButton = SKSpriteNode(imageNamed: "backbutton")
         backButton = SKLabelNode(fontNamed: "ArialRoundedMTBold")
@@ -171,7 +182,7 @@ class SinglePlayerScene: SKScene {
  */
         self.addChild(cards[51].img)
         
-        newHand()
+//        newHand()
         gameState = 0
     }
     
@@ -324,7 +335,7 @@ class SinglePlayerScene: SKScene {
 //        dealerScore.text = String(dealer.handValue)
         
         if !flip {
-            cards[cardIndex].img.run(SKAction.move(to: user.position, duration: 0.8))
+            cards[cardIndex].img.run(SKAction.move(to: user.position, duration: 0.5))
         }
         var c: Int
         c = cardIndex
@@ -361,6 +372,9 @@ class SinglePlayerScene: SKScene {
                     if node.name == "2" {
                         print("TEST")
                         bet(5)
+                    } else if node.name == "deal" {
+                        dealButton.run(SKAction.fadeOut(withDuration: 0.3))
+                        newHand()
                     }
                 case 1:
                     // Player's turn
@@ -397,7 +411,6 @@ class SinglePlayerScene: SKScene {
     }
     
     private func newHand() {
-        
         // Add card images to scene
         for i in 0...3 {
             self.addChild(cards[i].img)
@@ -405,25 +418,25 @@ class SinglePlayerScene: SKScene {
         
         // Animations for dealing to player and dealer
         for i in 0...1 {
-            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i)*1.6)) {
+            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i))) {
                 self.dealCard(user: self.player, flip: false)
             }
-            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i)*1.6 + 0.8)) {
+            cards[cardIndex].img.run(SKAction.wait(forDuration: Double(i) + 0.5)) {
                 self.dealCard(user: self.dealer, flip: false)
             }
         }
-        cards[cardIndex].img.run(SKAction.wait(forDuration: 1.6*1.6)) {
+        cards[cardIndex].img.run(SKAction.wait(forDuration: 1.6)) {
             self.gameState=1
             self.adjustCards(user: self.player, factor: 0.2)
         }
-        cards[cardIndex].img.run(SKAction.wait(forDuration: 2.1*1.6)) {
+        cards[cardIndex].img.run(SKAction.wait(forDuration: 2.1)) {
             self.adjustCards(user: self.dealer, factor: 0.05)
         }
-        cards[0].img.run(SKAction.wait(forDuration: 1.9*1.6)) {
+        cards[0].img.run(SKAction.wait(forDuration: 1.9)) {
             self.flipCard(i: 0)
             self.flipCard(i: 2)
         }
-        cards[3].img.run(SKAction.wait(forDuration: 2.4*1.6)) {
+        cards[3].img.run(SKAction.wait(forDuration: 2.4)) {
             self.flipCard(i: 3)
             if self.hasBlackjack(user: self.player) {
                 self.gameResult()
@@ -433,7 +446,7 @@ class SinglePlayerScene: SKScene {
                 }
             }
         }
-        self.run(SKAction.wait(forDuration: 3.4*1.6)) {
+        self.run(SKAction.wait(forDuration: 3.4)) {
             if self.hasBlackjack(user: self.player) {
                 self.cleanUp()
             }
