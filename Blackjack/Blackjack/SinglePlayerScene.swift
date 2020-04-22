@@ -26,13 +26,15 @@ class SinglePlayerScene: SKScene {
     var playerScore: SKLabelNode! // Hand value labels for player
     var dealerScore: SKLabelNode! // Hand value labels for player
     var result: SKLabelNode! // Result of the round
+    var backButton: SKLabelNode!
     
     override func didMove(to view: SKView) {
         initializeGame()
     }
     
     private func initializeGame() {
-        cardShoe = CGPoint(x: self.size.width * 0.8, y: self.size.height * 0.5)
+        GameManager.first = true
+        cardShoe = CGPoint(x: self.size.width * 0.8, y: self.size.height * 0.55)
         player = Player(p: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.3))
         dealer = Player(p: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.8))
         
@@ -42,11 +44,22 @@ class SinglePlayerScene: SKScene {
         
         result = SKLabelNode(fontNamed: "ArialRoundedMTBold")
         result.zPosition = 2
-        result.position = CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.6)
+        result.position = CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.55)
         result.fontSize = 50
         result.text = ""
         result.fontColor = SKColor.white
         self.addChild(result)
+        
+//        backButton = SKSpriteNode(imageNamed: "backbutton")
+        backButton = SKLabelNode(fontNamed: "ArialRoundedMTBold")
+        backButton.fontSize = 50
+        backButton.fontColor = SKColor.white
+        backButton.zPosition = 2
+        backButton.text = "Menu"
+        backButton.name = "back"
+//        backButton.size = CGSize(width: self.size.width * 0.2, height: self.size.width * 0.5)
+        backButton.position = CGPoint(x: self.size.width * 0.2, y: self.size.height * 0.9)
+        self.addChild(backButton)
         
         playerScore = SKLabelNode(fontNamed: "ArialRoundedMTBold")
         playerScore.zPosition = 2
@@ -60,7 +73,7 @@ class SinglePlayerScene: SKScene {
         dealerScore.zPosition = 2
         dealerScore.position = CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.7)
         dealerScore.fontSize = 40
-        dealerScore.text = ""
+        dealerScore.text = "Dealer"
         dealerScore.fontColor = SKColor.white
         self.addChild(dealerScore)
         
@@ -111,8 +124,21 @@ class SinglePlayerScene: SKScene {
         gameState = 1
     }
     
+    func checkAces(user: Player) {
+        // checks if the user has aces adjusts hand value if they bust
+        
+        for i in user.hand {
+            if cards[i].ace && user.handValue > 21 {
+                user.handValue -= 10
+                cards[i].ace = false
+            }
+        }
+    }
+    
     func dealerTurn() {
         // Player stays, now it's dealer's turn
+        
+//        checkAces(user: dealer)
         
         adjustCards(user: dealer, factor: 0.2)
         flipCard(i: 1) // flip their face down card
@@ -122,19 +148,28 @@ class SinglePlayerScene: SKScene {
         while dealVal < 17 {
             self.addChild(cards[cardIndex + amountToAdd].img)
             dealVal += cards[cardIndex + amountToAdd].num
+            if cards[cardIndex + amountToAdd].ace && dealVal > 21 {
+                dealVal -= 10
+//                cards[cardIndex + amountToAdd].ace = false
+            }
             amountToAdd += 1
         }
         
         if amountToAdd > 0 {
             for i in 1...amountToAdd {
                 cards[i+cardIndex-1].img.run(SKAction.wait(forDuration: Double(i-1) * 1.6)) {
+                    self.checkAces(user: self.dealer)
                     self.dealCard(user: self.dealer, flip: true)
+                    self.dealerScore.text = String(self.dealer.handValue)
                 }
             }
         }
         
         background.run(SKAction.wait(forDuration: (Double(amountToAdd)) * 1.6)) {
             print(self.dealer.handValue)
+            self.dealerScore.text = String(self.dealer.handValue)
+
+//            self.dealer.handValue = dealVal
             self.gameResult()
         }
         
@@ -146,20 +181,20 @@ class SinglePlayerScene: SKScene {
     }
     
     func gameResult() {
-        result.run(SKAction.fadeIn(withDuration: 0.5))
+        result.run(SKAction.fadeIn(withDuration: 1.5))
         if player.handValue > 21 {
-            result.text = "Player Busts"
+            result.text = "You Lose!"
             self.run(SKAction.wait(forDuration: 3.0)) {
                 self.cleanUp()
             }
         } else if dealer.handValue > 21 {
-            result.text = "Dealer Busts"
+            result.text = "You Win!"
         } else if dealer.handValue > player.handValue {
-            result.text = "Dealer Wins"
+            result.text = "You Lose!"
         } else if dealer.handValue == player.handValue {
-            result.text = "Draw"
+            result.text = "It's A Draw!"
         } else {
-            result.text = "Player Wins"
+            result.text = "You Win!"
         }
 
     }
@@ -176,7 +211,7 @@ class SinglePlayerScene: SKScene {
             self.removeAllChildren()
             let reveal = SKTransition.reveal(with: .down, duration: 0)
             let newScene = SinglePlayerScene(size: self.size)
-            self.scene?.view?.presentScene(newScene, transition: reveal)
+            self.scene?.view?.presentScene(newScene, transition: SKTransition.crossFade(withDuration: 1.0))
             print("card index: " + String(self.cardIndex))
         }
     }
@@ -184,8 +219,10 @@ class SinglePlayerScene: SKScene {
     //  deals a card to the inputted position
     func dealCard(user: Player, flip: Bool) {
         user.addVal(c: cards[cardIndex], i: cardIndex)
+        checkAces(user: user)
+
         playerScore.text = String(player.handValue)
-        dealerScore.text = String(dealer.handValue)
+//        dealerScore.text = String(dealer.handValue)
         
         if !flip {
             cards[cardIndex].img.run(SKAction.move(to: user.position, duration: 0.5))
@@ -227,13 +264,18 @@ class SinglePlayerScene: SKScene {
                         // player presses hit me
                         self.addChild(cards[cardIndex].img)
                         dealCard(user: player, flip: true)
+                        checkAces(user: player)
                         if player.handValue > 21 {
                             gameResult()
+                            gameState = 2
                         }
                     } else if node.name == "1" {
                         // player stays, move to dealer
                         gameState = 2
                         dealerTurn()
+                    } else if node.name == "back" {
+                        let newScene = GameScene(size: self.size)
+                        self.scene?.view?.presentScene(newScene, transition: SKTransition.crossFade(withDuration: 1.0))
                     }
                 default: break
                 }
@@ -271,6 +313,8 @@ class SinglePlayerScene: SKScene {
         cards[3].img.run(SKAction.wait(forDuration: 2.4)) {
             self.flipCard(i: 3)
         }
+        
+        checkAces(user: player)
     }
     
 
@@ -319,7 +363,6 @@ class SinglePlayerScene: SKScene {
         func addVal(c: Card, i: Int) {
             hand.append(i)
             handValue += c.num
-            
         }
     }
     

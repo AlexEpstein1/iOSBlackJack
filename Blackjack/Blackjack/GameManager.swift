@@ -10,5 +10,6 @@ import Foundation
 import SpriteKit
 
 class GameManager {
+    static var first : Bool!
     
 }

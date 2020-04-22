@@ -28,22 +28,26 @@ class GameScene: SKScene {
     }
     
     private func initializeMenu() {
+        var center = self.position
+        if GameManager.first != nil {
+            center = CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.5)
+        }
         background = SKSpriteNode(imageNamed: "menu_background")
         background.name = "background"
         background.zPosition = 1
-        background.position = CGPoint(x: 0, y: 0)
+        background.position = center
         background.size = self.size
         self.addChild(background)
         
         logo = SKSpriteNode(imageNamed: "logo")
         logo.zPosition = 2
-        logo.position = CGPoint(x: 0, y: self.size.height * 0.25)
+        logo.position = CGPoint(x: center.x, y: center.y + self.size.height * 0.25)
         logo.size = CGSize(width: self.size.width * 0.4, height: self.size.width * 0.4)
         self.addChild(logo)
         
         playButton = SKLabelNode(fontNamed: "ArialRoundedMTBold")
         playButton.zPosition = 2
-        playButton.position = CGPoint(x: 0, y: 0)
+        playButton.position = center
         playButton.fontSize = 40
         playButton.name = "playButton"
         playButton.text = "Play"
@@ -68,14 +72,15 @@ class GameScene: SKScene {
     
     
     private func startGame() {
-        logo.run(SKAction.move(to: CGPoint(x: self.size.width * 0.5, y: self.size.height * 2), duration: 1))
-        playButton.run(SKAction.move(to: CGPoint(x: self.size.width * 0.5, y: self.size.height * 2), duration: 1))
+//        logo.run(SKAction.move(to: CGPoint(x: self.size.width * 0.5, y: self.size.height * 2), duration: 1))
+//        playButton.run(SKAction.move(to: CGPoint(x: self.size.width * 0.5, y: self.size.height * 2), duration: 1))
         
-        let reveal = SKTransition.reveal(with: .down, duration: 0)
+        let reveal = SKTransition.reveal(with: .up, duration: 1.5)
         let newScene = SinglePlayerScene(size: self.size)
-        self.run(SKAction.wait(forDuration: 1.5)) {
-            self.scene?.view?.presentScene(newScene, transition: reveal)
-        }
+//        self.run(SKAction.wait(forDuration: 1.5)) {
+//            self.scene?.view?.presentScene(newScene, transition: reveal)
+//        }
+        scene?.view?.presentScene(newScene, transition: SKTransition.crossFade(withDuration: 1.5))
     }
 }
 

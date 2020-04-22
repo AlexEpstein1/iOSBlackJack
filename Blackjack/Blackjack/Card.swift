@@ -17,12 +17,14 @@ class Card: NSObject {
     var face: SKSpriteNode!
     var front: Bool!
     var name: String!
+    var ace: Bool!
     
     override init() {
         
     }
 
     func initialize(s: Int, n: Int) {
+        ace = false
         suit = s
         num = n
         img = SKSpriteNode(imageNamed: "card-back")
@@ -44,6 +46,7 @@ class Card: NSObject {
         face = SKSpriteNode(imageNamed: name)
         if num == 14 {
             num = 11
+            ace = true
         } else if num > 10 {
             num = 10
         }
