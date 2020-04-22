@@ -87,17 +87,19 @@ class SinglePlayerScene: SKScene {
         buttons.append(SKSpriteNode(imageNamed: "hit"))
         buttons.append(SKSpriteNode(imageNamed: "stay"))
         buttons.append(SKSpriteNode(imageNamed: "double"))
-        buttons.append(SKSpriteNode(imageNamed: "split"))
+        buttons.append(SKSpriteNode(imageNamed: "BetFive"))
         
-        for i in 0...3 {
+        let numButs = 3
+        
+        for i in 0...numButs-1 {
             buttons[i].name = String(i)
             buttons[i].zPosition = 4
         }
         
-        for i in 0...2 {
-            buttons[i].position = CGPoint(x: self.size.width * 0.5, y: self.size.width * 0.15)
-            buttons[i].position.x += CGFloat(i - 1) * self.size.width * 0.3
-            buttons[i].size = CGSize(width: self.size.width * 0.25, height: self.size.width * 0.1)
+        for i in 0...numButs-1 {
+            buttons[i].position = CGPoint(x: self.size.width * 0.5+(numButs%2==0 ? (self.size.width * (1/CGFloat(2*numButs))) : CGFloat(0)), y: self.size.width * 0.15)
+            buttons[i].position.x += CGFloat(i - numButs/2) * self.size.width * (1/CGFloat(numButs))
+            buttons[i].size = CGSize(width: self.size.width/(CGFloat(numButs+1)), height: self.size.width * 0.1)
             self.addChild(buttons[i])
         }
         
@@ -118,10 +120,22 @@ class SinglePlayerScene: SKScene {
         }
         
         cards.shuffle()
+        /*cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+            return card.num == 10
+        })!, 0)
+        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+            return card.ace
+        })!, 2)
+        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+            return card.num == 10
+        })!, 1)
+        cards.swapAt(cards.lastIndex(where: { (card) -> Bool in
+            return card.ace
+        })!, 3)*/
         self.addChild(cards[51].img)
         
         newHand()
-        gameState = 1
+        gameState = 0
     }
     
     func checkAces(user: Player) {
@@ -180,9 +194,27 @@ class SinglePlayerScene: SKScene {
         
     }
     
+    func hasBlackjack(user:Player) -> Bool {
+        var ace = false
+        var king = false
+        for i in user.hand {
+            if cards[i].ace {
+                ace = true
+            }
+            if cards[i].num == 10 {
+                king = true
+            }
+        }
+        return ace && king && user.hand.count == 2
+    }
+    
     func gameResult() {
         result.run(SKAction.fadeIn(withDuration: 1.5))
-        if player.handValue > 21 {
+        if hasBlackjack(user: player) && !hasBlackjack(user: dealer) {
+            result.text = "Blackjack!"
+        } else if !hasBlackjack(user: player) && hasBlackjack(user: dealer) {
+            result.text = "Dealer Blackjack!"
+        } else if player.handValue > 21 {
             result.text = "You Lose!"
             self.run(SKAction.wait(forDuration: 3.0)) {
                 self.cleanUp()
@@ -215,9 +247,15 @@ class SinglePlayerScene: SKScene {
             print("card index: " + String(self.cardIndex))
         }
     }
-    
+    var done = false
     //  deals a card to the inputted position
     func dealCard(user: Player, flip: Bool) {
+        if !done {
+            done = true;
+            //cardIndex = 13
+        } else {
+            //cardIndex = 14
+        }
         user.addVal(c: cards[cardIndex], i: cardIndex)
         checkAces(user: user)
 
@@ -276,12 +314,18 @@ class SinglePlayerScene: SKScene {
                     } else if node.name == "back" {
                         let newScene = GameScene(size: self.size)
                         self.scene?.view?.presentScene(newScene, transition: SKTransition.crossFade(withDuration: 1.0))
+                    } else if node.name == "2" {
+                        bet(5)
                     }
                 default: break
                 }
                 
             }
         }
+    }
+    
+    func bet(_ bet:Int) {
+        
     }
     
     private func newHand() {
@@ -301,6 +345,7 @@ class SinglePlayerScene: SKScene {
             }
         }
         cards[cardIndex].img.run(SKAction.wait(forDuration: 1.6)) {
+            self.gameState=1
             self.adjustCards(user: self.player, factor: 0.2)
         }
         cards[cardIndex].img.run(SKAction.wait(forDuration: 2.1)) {
@@ -312,9 +357,23 @@ class SinglePlayerScene: SKScene {
         }
         cards[3].img.run(SKAction.wait(forDuration: 2.4)) {
             self.flipCard(i: 3)
+            if self.hasBlackjack(user: self.player) {
+                self.gameResult()
+                self.gameState = 2
+                if self.hasBlackjack(user: self.dealer) {
+                    self.flipCard(i: 1)
+                }
+            }
+        }
+        self.run(SKAction.wait(forDuration: 3.4)) {
+            if self.hasBlackjack(user: self.player) {
+                self.cleanUp()
+            }
+            
         }
         
         checkAces(user: player)
+        
     }
     
 
@@ -353,6 +412,7 @@ class SinglePlayerScene: SKScene {
         var position: CGPoint
         var handValue: Int
         var hand: [Int]
+        
         
         init(p: CGPoint) {
             position = p

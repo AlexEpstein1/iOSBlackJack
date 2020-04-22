@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DD13E5E3244FC69F00805CAC /* icon1.png in Resources */ = {isa = PBXBuildFile; fileRef = DD13E5E2244FC69E00805CAC /* icon1.png */; };
 		DD949CF92446312B0017451B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD949CF82446312B0017451B /* AppDelegate.swift */; };
 		DD949CFB2446312B0017451B /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = DD949CFA2446312B0017451B /* GameScene.sks */; };
 		DD949CFD2446312B0017451B /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = DD949CFC2446312B0017451B /* Actions.sks */; };
@@ -24,7 +23,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		DD13E5E2244FC69E00805CAC /* icon1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon1.png; path = "../../../../Library/Messages/Attachments/07/07/AF6D0FFF-A89E-4CAE-BB79-611A1DE0DEFB/icon1.png"; sourceTree = "<group>"; };
 		DD949CF52446312B0017451B /* Blackjack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackjack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD949CF82446312B0017451B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DD949CFA2446312B0017451B /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -84,7 +82,6 @@
 				DD949D052446312D0017451B /* Assets.xcassets */,
 				DD949D072446312D0017451B /* LaunchScreen.storyboard */,
 				DD949D0A2446312D0017451B /* Info.plist */,
-				DD13E5E2244FC69E00805CAC /* icon1.png */,
 				DD949D1A2446413E0017451B /* Card.swift */,
 				DD949D1C244641880017451B /* Deck.swift */,
 			);
@@ -151,7 +148,6 @@
 			files = (
 				DD949D042446312B0017451B /* Main.storyboard in Resources */,
 				DD949CFB2446312B0017451B /* GameScene.sks in Resources */,
-				DD13E5E3244FC69F00805CAC /* icon1.png in Resources */,
 				DD949D062446312D0017451B /* Assets.xcassets in Resources */,
 				DD949D092446312D0017451B /* LaunchScreen.storyboard in Resources */,
 				DD949CFD2446312B0017451B /* Actions.sks in Resources */,
@@ -317,7 +313,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = Q8KQKQU7CD;
+				DEVELOPMENT_TEAM = 2DK368HC36;
 				INFOPLIST_FILE = Blackjack/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -335,7 +331,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = Q8KQKQU7CD;
+				DEVELOPMENT_TEAM = 2DK368HC36;
 				INFOPLIST_FILE = Blackjack/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
