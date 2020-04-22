@@ -53,6 +53,26 @@ class SinglePlayerScene: SKScene {
             playerChips = 500
         }
         
+        if playerChips<5 {
+            let alert = UIAlertController(title: "Broke", message: "You're broke! Would you like to reload your chips?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Yes, reload 500 chips", style: .default, handler: { action in
+                self.playerChips = 500
+                self.updateBetLabels()
+
+            }))
+            alert.addAction(UIAlertAction(title: "Yes, reload 100 chips", style: .default, handler: { action in
+                self.playerChips = 100
+                self.updateBetLabels()
+
+
+            }))
+            alert.addAction(UIAlertAction(title: "No, I don't want chips", style: .default, handler: { action in
+                  
+
+
+            }))
+            self.view?.window?.rootViewController?.present(alert, animated: true, completion: nil)
+        }
          
         GameManager.first = true
         cardShoe = CGPoint(x: self.size.width * 0.8, y: self.size.height * 0.55)
